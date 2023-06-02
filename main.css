@@ -1,0 +1,114 @@
+body {
+    text-align: center;
+}
+
+main {
+    margin-top: -40px !important;
+    min-width: 230px;
+}
+
+hgroup {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    align-items: center;
+    border-radius: .5em;
+    margin: 0;
+}
+
+h2 {
+    display: flex;
+    justify-content: space-between;
+}
+
+article {
+    padding: 10px 5px;
+    margin: 0.5em 0px;
+    /* background-color: red; */
+}
+
+mark:hover {
+    cursor: pointer !important;
+    transform: scale(1.1);
+    transition: all 0.3s ease;
+}
+
+kbd {
+    text-align: center;
+}
+
+img {
+    margin: 10px 0px;
+    padding: 0px;
+}
+
+.action:hover {
+    color: #1095c1;
+    transform: scale(1.1);
+    text-decoration: underline;
+    cursor: pointer;
+}
+
+.logo-box {
+    height: 150px;
+}
+
+.shimmer {
+    color: grey;
+    display: inline-block;
+    -webkit-mask: linear-gradient(-60deg, #000 30%, #0005, #000 70%) right/300% 100%;
+    background-repeat: no-repeat;
+    animation: shimmer 1s infinite;
+}
+
+.info {
+    position: fixed;
+    text-align: center;
+    padding: 5px 15px;
+    bottom: 0px;
+    background: #9AE6B4;
+    border-radius: .5em;
+}
+
+.hidden {
+    display: none;
+}
+
+.box {
+    display: grid;
+    place-items: center;
+    text-align: center;
+}
+
+.flex {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+}
+
+.btn {
+    width: 40px;
+    height: 40px;
+    padding: 5px;
+    margin: 5px;
+    background: whitesmoke;
+    border-radius: 50%;
+    border: 1px solid #ddd;
+}
+
+.btn:hover {
+    /* box-shadow: 0 0 5px 0 rgba(0, 0, 0, 0.5); */
+    transform: scale(1.1);
+    transition: all 0.3s ease;
+    
+}
+
+.tiny {
+    font-size: 9pt;
+}
+
+@keyframes shimmer {
+    100% {
+        -webkit-mask-position: left
+    }
+}
