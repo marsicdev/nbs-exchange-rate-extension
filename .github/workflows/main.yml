@@ -1,0 +1,80 @@
+name: NBS Exchange Rate
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+
+jobs:
+  exchange-rate:
+    name: Deploy backend
+    runs-on: ubuntu-latest
+    outputs:
+      appVersion: ${{ steps.extension-version.outputs.current-version }}
+      releaseNotes: ${{ steps.release-notes.outputs.notes }}
+    steps:
+      - uses: actions/checkout@v2
+      - name: get-version
+        id: extension-version
+        run: |
+          echo "current-version=$(cat ./extension/manifest.json | jq -r '.version')" >> $GITHUB_OUTPUT
+      - name: Collect release notes
+        id: release-notes
+        run: |
+          echo "::group::Prepare release notes"
+          RELEASE_NOTES=$(awk -v ver=${{ steps.extension-version.outputs.current-version }} '/^## \[/ { if ($2 == "["ver"]") { p=1 } else { p=0 } } p { print }' CHANGELOG.md | tail -n +3)
+          echo "RELEASE_NOTES<<EOF" >> $GITHUB_ENV
+          echo "$RELEASE_NOTES" >> $GITHUB_ENV
+          echo "EOF" >> $GITHUB_ENV
+          echo "::endgroup::"
+          echo "notes=${{ env.RELEASE_NOTES }}" >> $GITHUB_OUTPUT
+      - name: Create Release Tag
+        id: create-release
+        uses: softprops/action-gh-release@v1
+        with:
+          prerelease: ${{ github.ref == 'refs/heads/develop' }}
+          tag_name: ${{ steps.extension-version.outputs.current-version }}
+          body: ${{ env.RELEASE_NOTES }}
+          token: ${{ secrets.GITHUB_TOKEN }}
+  slack-workflow-status:
+    if: always()
+    name: Post Workflow Status To Slack
+    needs: exchange-rate
+    steps:
+      - name: Slack Notification
+        id: slack
+        uses: slackapi/slack-github-action@v1.24.0
+        with:
+          slack-message: "NBS Exchange Rate - Chrome Extension | (v${{ env.APP_VERSION }})"
+          # For posting a rich message using Block Kit
+          payload: |
+            {
+              "text": "Build result: ${{ job.status }}\n${{ github.event.pull_request.html_url || github.event.head_commit.url }}",
+              "blocks": [
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": "```${{ env.RELEASE_NOTES }}```"
+                  }
+                }
+              ]
+            }
+        env:
+          RELEASE_NOTES: ${{ needs.exchange-rate.outputs.releaseNotes }}
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          SLACK_WEBHOOK_TYPE: INCOMING_WEBHOOK
+      - name: Slack Workflow
+        id: slack-workflow
+        uses: Gamesight/slack-workflow-status@master
+        env:
+          APP_VERSION: ${{ needs.exchange-rate.outputs.appVersion }}
+        with:
+          # Required Input
+          repo_token: ${{secrets.GITHUB_TOKEN}}
+          slack_webhook_url: ${{secrets.SLACK_WEBHOOK_URL}}
+          # Optional Input
+          channel: "#project-activity"
+          name: "NBS Exchange Rate - Chrome Extension | (v${{ env.APP_VERSION }})"
+          icon_emoji: ":euro:"
