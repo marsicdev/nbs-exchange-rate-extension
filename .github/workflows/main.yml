@@ -8,13 +8,22 @@ on:
 
 jobs:
   exchange-rate:
-    name: Deploy backend
+    name: Pack extension
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     outputs:
       appVersion: ${{ steps.extension-version.outputs.current-version }}
       releaseNotes: ${{ steps.release-notes.outputs.notes }}
     steps:
       - uses: actions/checkout@v2
+      - uses: montudor/action-zip@v1
+        with:
+          args: zip -qq -r nbs.zip extension/
+      - uses: actions/upload-artifact@v2
+        with:
+          name: nbs
+          path: nbs.zip
       - name: get-version
         id: extension-version
         run: |
@@ -36,35 +45,12 @@ jobs:
           prerelease: ${{ github.ref == 'refs/heads/develop' }}
           tag_name: ${{ steps.extension-version.outputs.current-version }}
           body: ${{ env.RELEASE_NOTES }}
-          token: ${{ secrets.GITHUB_TOKEN }}
-  slack-workflow-status:
+  slack-status:
     if: always()
-    name: Post Workflow Status To Slack
+    name: Post Status To Slack
+    runs-on: ubuntu-latest
     needs: exchange-rate
     steps:
-      - name: Slack Notification
-        id: slack
-        uses: slackapi/slack-github-action@v1.24.0
-        with:
-          slack-message: "NBS Exchange Rate - Chrome Extension | (v${{ env.APP_VERSION }})"
-          # For posting a rich message using Block Kit
-          payload: |
-            {
-              "text": "Build result: ${{ job.status }}\n${{ github.event.pull_request.html_url || github.event.head_commit.url }}",
-              "blocks": [
-                {
-                  "type": "section",
-                  "text": {
-                    "type": "mrkdwn",
-                    "text": "```${{ env.RELEASE_NOTES }}```"
-                  }
-                }
-              ]
-            }
-        env:
-          RELEASE_NOTES: ${{ needs.exchange-rate.outputs.releaseNotes }}
-          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
-          SLACK_WEBHOOK_TYPE: INCOMING_WEBHOOK
       - name: Slack Workflow
         id: slack-workflow
         uses: Gamesight/slack-workflow-status@master
