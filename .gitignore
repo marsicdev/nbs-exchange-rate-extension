@@ -1,3 +1,5 @@
 *.pem
 *.zip
 *.crx
+
+*.DS_Store

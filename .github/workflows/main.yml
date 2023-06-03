@@ -16,11 +16,11 @@ jobs:
       appVersion: ${{ steps.extension-version.outputs.current-version }}
       releaseNotes: ${{ steps.release-notes.outputs.notes }}
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - uses: montudor/action-zip@v1
         with:
           args: zip -qq -r nbs.zip extension/
-      - uses: actions/upload-artifact@v2
+      - uses: actions/upload-artifact@v3
         with:
           name: nbs
           path: nbs.zip
