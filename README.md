@@ -15,10 +15,10 @@ The **NBS Exchange Rate Chrome Extension** is a widget that allows users to quic
 
 #### TBD - Upcoming features and improvements
 
--   [ ] Language switcher
+-   [x] Language switcher
+-   [ ] Refetch rates
 -   [ ] Theme switcher
 -   [ ] Favorites
--   [ ] Refetch rates
 -   [ ] Automate release process
 -   [ ] Migrate to TS and MVC
 

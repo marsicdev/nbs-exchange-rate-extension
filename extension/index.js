@@ -1,6 +1,6 @@
 //@ts-check
 const NBS_EXCHANGE_RATE_URL =
-    'https://www.nbs.rs/kursnaListaModul/srednjiKurs.faces?lang=eng'
+    'https://www.nbs.rs/kursnaListaModul/srednjiKurs.faces'
 
 const DOMSelector = Object.freeze({
     htmlTag: 'html',
@@ -12,8 +12,8 @@ const DOMSelector = Object.freeze({
     logoImage: '.logo',
 })
 
-function fetchExchangeRates() {
-    const nbsCorsEndpoint = `https://cors.hypetech.xyz/${NBS_EXCHANGE_RATE_URL}`
+function fetchExchangeRates(lang = 'eng') {
+    const nbsCorsEndpoint = `https://cors.hypetech.xyz/${NBS_EXCHANGE_RATE_URL}?lang=${lang}`
     fetch(nbsCorsEndpoint)
         .then((response) => response.text())
         .then((data) => {
@@ -36,20 +36,36 @@ function fetchExchangeRates() {
             }
 
             // Create HTML output
+            const rows = []
+            const tempRows = []
             let htmlOutput = '<div>'
-            currencyList.forEach((elem) => {
-                const exchangeRateRow = elem.innerHTML
-                    .trim()
-                    .replaceAll(` tabindex="0"`, '')
-                    .replaceAll(`<td>`, '')
-                    .split('</td>')
-                    .map((item) => item.trim())
+            currencyList
+                .forEach((elem) => {
+                    const exchangeRateRow = elem.innerHTML
+                        .trim()
+                        .replaceAll(` tabindex="0"`, '')
+                        .replaceAll(`<td>`, '')
+                        .split('</td>')
+                        .map((item) => item.trim())
 
-                htmlOutput += createCardHTML(exchangeRateRow)
-            })
+                    const currencyCode = exchangeRateRow[0]
+                    const order = ["EUR", "USD", "GBP", "CHF", "EUR", "CAD"]
+
+                    if (order.includes(currencyCode)) {
+                        tempRows.unshift(createCardHTML(exchangeRateRow))
+                    } else {
+                        rows.push(createCardHTML(exchangeRateRow))
+                    }
+                })
+
+            const more = `
+                <details class="more">
+                    <summary><strong>SHOW MORE</strong></summary>
+                    ${rows.join("")}
+                </details>`
 
             // End HTML output
-            htmlOutput += '</div>'
+            htmlOutput += tempRows.reverse().join("") + more + '</div>'
 
             // Display HTML output
             const $ratesList = document.querySelector(DOMSelector.ratesList)
@@ -172,6 +188,18 @@ Developed by @marsicdev.`)
         chrome.tabs.create({
             url: 'https://github.com/marsicdev',
         })
+    })
+
+    document.querySelector('.eng')?.addEventListener('click', () => {
+        fetchExchangeRates('eng')
+        document.querySelector('.lat')?.classList.remove('active')
+        document.querySelector('.eng')?.classList.add('active')
+    })
+
+    document.querySelector('.lat')?.addEventListener('click', () => {
+        fetchExchangeRates('lat')
+        document.querySelector('.eng')?.classList.remove('active')
+        document.querySelector('.lat')?.classList.add('active')
     })
 }
 

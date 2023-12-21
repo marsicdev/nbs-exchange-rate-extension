@@ -27,6 +27,11 @@ article {
     /* background-color: red; */
 }
 
+details {
+    border-bottom: 0px;
+    margin: 1.5rem 0px;
+}
+
 mark:hover {
     cursor: pointer !important;
     transform: scale(1.1);
@@ -100,7 +105,11 @@ img {
     /* box-shadow: 0 0 5px 0 rgba(0, 0, 0, 0.5); */
     transform: scale(1.1);
     transition: all 0.3s ease;
-    
+}
+
+
+.active {
+    color: #1095c1;
 }
 
 .tiny {
